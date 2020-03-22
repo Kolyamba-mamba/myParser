@@ -5,8 +5,8 @@ from bs4 import BeautifulSoup as BS
 import csv
 
 pages = []
-url = 'https://www.citilink.ru/catalog/mobile/notebooks/'
-req = requests.get(url)
+url1 = 'https://www.citilink.ru/catalog/mobile/notebooks/'
+req = requests.get(url1)
 html = BS(req.content, 'html.parser')
 pages_count = int(html.select('.last')[0].text)
 id = 0
@@ -23,20 +23,27 @@ def write_csv(data):
                          data['price']))
 
 
-async def load_page(num):
+async def load_page(num, url):
     async with aiohttp.ClientSession() as session:
         async with session.get(url + '?available=1&status=55395790&p=' + str(num)) as response:
             pages.append(await response.text())
 
 
+async def start_parsing(url, count):
+    if url == 'https://www.citilink.ru/catalog/mobile/notebooks/':
+        print("Адрес введен верно, начинаю парсинг")
+        await asyncio.gather(
+            *[load_page(num, url) for num in range(1, count)]
+        )
+        return True
+    else:
+        print("Проверьте правильность ардреса")
+        return False
+
+
 async def main():
-    # Schedule three calls *concurrently*:
-    await asyncio.gather(
-        *[load_page(num) for num in range(1, pages_count)]
-    )
+    await start_parsing('https://www.citilink.ru/catalog/mobile/notebooks/', pages_count)
 
-
-asyncio.run(main())
 
 for r in pages:
     html = BS(r, 'html.parser')
@@ -72,5 +79,3 @@ for r in pages:
                 'price': price}
 
         write_csv(data)
-
-        print(data)

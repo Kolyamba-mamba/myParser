@@ -1,7 +1,20 @@
 # Тут будут тесты
-import unittest
+import asyncio
+from myparser import start_parsing
 
-#Написать тесты на проверку того, что это ситилинк
 
-if __name__ == '__main__':
-    unittest.main()
+async def test_sitilink_notenook():
+    await start_parsing('https://www.citilink.ru/catalog/mobile/notebooks/', 3)
+
+
+async def test_sitilink_catalog():
+    await start_parsing('https://www.citilink.ru/catalog/mobile/', 3)
+
+
+async def test_wrong_url():
+    await start_parsing('https://www.google.ru/', 4)
+
+
+asyncio.run(test_sitilink_notenook())
+asyncio.run(test_sitilink_catalog())
+asyncio.run(test_wrong_url())
